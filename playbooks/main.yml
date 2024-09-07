@@ -1,0 +1,7 @@
+---
+- name: Automation LAMP Stack
+  hosts: local
+  roles:
+    - role: prerequisites
+    - role: configure_lamp
+    - role: reverse_proxy

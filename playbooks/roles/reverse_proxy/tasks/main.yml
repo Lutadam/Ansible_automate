@@ -1,0 +1,66 @@
+---
+# Add tasks to generate and configure an SSL certificate and a private key here
+# Add tasks to configure nginx as a reverse proxy here
+# Add vhosts and other necessary files in the files/ and/or templates/ directories as appropriate
+# Use handlers to restart nginx if necessary
+
+- name: Set facts
+  set_fact:
+    ssl_cert_dir: /etc/ssl/certs
+    ssl_key_dir: /etc/ssl/private
+    ssl_cert_file: "/etc/ssl/certs/nginx.crt"
+    ssl_key_file: "/etc/ssl/private/nginx.key"
+
+- name: Ensure SSL directories exist
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: '0755'
+  loop:
+    - "{{ ssl_cert_dir }}"
+    - "{{ ssl_key_dir }}"
+  become: true
+
+- name: Generate SSL private key if not present
+  community.crypto.openssl_privatekey:
+    path: "{{ ssl_key_file }}"
+    size: 2048
+  become: true
+
+- name: Set permissions on the SSL private key
+  file:
+    path: "{{ ssl_key_file }}"
+    mode: '0600'
+  become: true
+
+- name: Generate SSL certificate if not present
+  community.crypto.x509_certificate:
+    path: "{{ ssl_cert_file }}"
+    privatekey_path: "{{ ssl_key_file }}"
+    provider: selfsigned
+  become: true
+
+- name: Copy Nginx vhost configuration
+  template:
+    src: vhost.j2
+    dest: /etc/nginx/sites-available/default
+  notify:
+    - restart nginx
+  become: true
+
+- name: Enable Nginx vhost
+  file:
+    src: /etc/nginx/sites-available/default
+    dest: /etc/nginx/sites-enabled/default
+    state: link
+  notify:
+    - restart nginx
+  become: true
+
+- name: Ensure Nginx is started and enabled
+  systemd:
+    name: nginx
+    state: started
+    enabled: yes
+  become: true
+

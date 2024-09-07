@@ -1,0 +1,6 @@
+---
+repo_dest: "/home/atul/docker_lamp"
+db_name: your_database
+db_username: your_username
+db_user: myuser
+db_database: mydatabase
