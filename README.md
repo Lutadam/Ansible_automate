@@ -34,3 +34,7 @@ to be resolved.
 2. Run the `ansible-playbook playbooks/main.yml -v` command to test whether everything
 runs properly.
 3. Run the `ansible-lint` command and ensure that all issues are resolved.
+
+## Additional Custom Instructions
+
+1. Make sure to change the `repo_dest` variable under `playbooks/roles/configure_lamp/defaults/main.yml` to the desired location on the WSL server.
